@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../lib/supabaseClient';
+import { useAdaptiveGreeting } from '../../lib/greeting';
 
 export default function TripsListPage() {
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const greeting = useAdaptiveGreeting();
 
   useEffect(() => {
     async function load() {
@@ -41,9 +43,20 @@ export default function TripsListPage() {
 
   return (
     <div className="container">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 500 }}>Chuyến đi của bạn</h1>
-        <Link href="/trips/new"><button>Tạo chuyến đi mới</button></Link>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 500, margin: 0 }}>
+              {greeting ? greeting.greeting : 'Hôm nay, bạn muốn đi đâu?'}
+            </h1>
+            {greeting && (
+              <p style={{ fontSize: 13, color: 'rgba(28,43,58,0.62)', margin: '4px 0 0' }}>
+                {greeting.subline}
+              </p>
+            )}
+          </div>
+          <Link href="/trips/new"><button>Tạo chuyến đi mới</button></Link>
+        </div>
       </div>
 
       {trips.length === 0 ? (

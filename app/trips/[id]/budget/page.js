@@ -109,7 +109,7 @@ export default function BudgetPage({ params }) {
   const totalSpent = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const budget = trip.budget ? Number(trip.budget) : null;
   const pctUsed = budget ? Math.min(100, Math.round((totalSpent / budget) * 100)) : null;
-  const currency = trip.currency || 'USD';
+  const currency = trip.currency || 'VND';
 
   // balances: paid - owed, per user
   const paidByUser = {};

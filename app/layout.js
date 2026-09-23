@@ -1,13 +1,13 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'Itinerary planner',
-  description: 'Plan trips with friends, on a map, on a budget.',
+  title: 'vivu.vn',
+  description: 'Hệ thống thiết kế và quản lý lịch trình du lịch cho cá nhân, gia đình và doanh nghiệp',
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <body>{children}</body>
     </html>
   );

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '../../../lib/supabaseClient';
 
@@ -11,6 +11,31 @@ export default function NewTripPage() {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Nights between the two dates, or null if either date is missing/invalid.
+  // UTC midnight is used for both so a DST transition can't shift the count.
+  function calculateDuration(start, end) {
+    if (!start || !end) return null;
+    const startUTC = new Date(`${start}T00:00:00Z`);
+    const endUTC = new Date(`${end}T00:00:00Z`);
+    const diffDays = Math.round((endUTC - startUTC) / 86400000);
+    return diffDays >= 0 ? diffDays : null;
+  }
+ 
+  const duration = calculateDuration(startDate, endDate);
+ 
+  function handleStartDateChange(value) {
+    setStartDate(value);
+    // If the existing end date is now before the new start date, clear it
+    // instead of leaving an invalid range sitting in the form.
+    if (endDate && value && endDate < value) {
+      setEndDate('');
+    }
+  }
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -24,16 +49,11 @@ export default function NewTripPage() {
     setSaving(true);
 
     const { data: { session } } = await supabase.auth.getSession();
-    console.log('SESSION:', session);
-    console.log('USER ID:', session?.user?.id);
-    console.log('TOKEN:', session.access_token);
 
     if (!session) {
       router.replace('/login');
       return;
     }
-  const { data: debugData, error: debugError } = await supabase.rpc('debug_request_jwt');
-  console.log('DEBUG JWT:', debugData, debugError);
 
     const { data, error } = await supabase
       .from('trips')
@@ -47,29 +67,15 @@ export default function NewTripPage() {
       .single();
 
     if (error) {
-      console.error( 'FULL ERROR:', error);
       setSaving(false);
       setError(error.message);
       return;
-  }
-   // Add the owner as a member so they can view/access the trip
-    const { error: memberError } = await supabase
-      .from('trip_members')
-      .insert({
-        trip_id: data.id,
-        user_id: session.user.id,
-        role: 'owner',
-      });
-
-    setSaving(false);
-
-    if (memberError) {
-      console.error('Failed to add owner as member:', memberError.message);
-      // Trip was created but membership failed — still navigate, but log it
     }
 
+    setSaving(false);
     router.push(`/trips/${data.id}`);
   }
+
   return (
     <div className="container">
       <h1 style={{ fontSize: 22, fontWeight: 500 }}>Hôm nay, bạn muốn đi đâu?</h1>
@@ -86,25 +92,35 @@ export default function NewTripPage() {
           />
         </label>
 
-        <label style={{ fontSize: 13, color: '#666' }}>
+                <label style={{ fontSize: 13, color: '#666' }}>
           Ngày khởi hành
           <input
             type="date"
             value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
+            onChange={(e) => handleStartDateChange(e.target.value)}
             style={{ display: 'block', width: '100%', marginTop: 4 }}
           />
         </label>
-
+ 
         <label style={{ fontSize: 13, color: '#666' }}>
           Ngày kết thúc
           <input
             type="date"
             value={endDate}
+            min={startDate || undefined}
+            disabled={!startDate}
             onChange={(e) => setEndDate(e.target.value)}
             style={{ display: 'block', width: '100%', marginTop: 4 }}
           />
         </label>
+ 
+        {duration !== null && (
+          <p style={{ fontSize: 13, color: 'rgba(28,43,58,0.62)', margin: 0 }}>
+            {duration === 0
+              ? 'Chuyến đi trong ngày.'
+              : `${duration + 1} ngày, ${duration} đêm.`}
+          </p>
+        )}
 
         {error && <p style={{ color: '#c0392b', fontSize: 13 }}>{error}</p>}
 
