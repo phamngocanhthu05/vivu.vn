@@ -64,3 +64,36 @@ input {
   padding: 16px;
   background: rgba(255, 255, 255, 0.4);
 }
+
+.brand {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.popup-input {
+  border: 1px solid rgba(28,43,58,0.22);
+  border-radius: 3px;
+  padding: 0.4em 0.6em;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 13px;
+}
+.popup-save-btn {
+  background: #1C2B3A;
+  color: #F1E9D8;
+  border: none;
+  border-radius: 3px;
+  padding: 0.4em 0.8em;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.popup-save-btn:hover {
+  background: #A8503B;
+}
+.marker-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 180px;
+}
